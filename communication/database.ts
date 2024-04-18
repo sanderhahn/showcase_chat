@@ -22,14 +22,14 @@ export class Database {
   async insertUser(user: DatabaseUser & { accessToken: string }) {
     const { error } = await this.#client
       .from("users")
-      .upsert([
+      .upsert(
         {
           id: user.userId,
           username: user.userName,
           avatar_url: user.avatarUrl,
           access_token: user.accessToken,
         },
-      ], { returning: "minimal" });
+      );
     if (error) {
       throw new Error(error.message);
     }
@@ -91,26 +91,20 @@ export class Database {
   }
 
   async ensureRoom(name: string) {
-    const insert = await this.#client.from("rooms").insert([{ name }], {
-      upsert: false,
-      returning: "representation",
-    });
-
-    if (insert.error) {
-      if (insert.error.code !== "23505") {
-        throw new Error(insert.error.message);
-      }
-      const get = await this.#client.from("rooms").select("id").eq(
-        "name",
-        name,
-      );
-      if (get.error) {
-        throw new Error(get.error.message);
-      }
-      return get.data[0].id;
+    const insert = await this.#client.from("rooms").insert({ name });
+    if (insert.statusText === "Conflict") {
+      // ignore conflict
+    } else if (insert.error) {
+      throw new Error(insert.error.message);
     }
-
-    return insert.data![0].id;
+    const get = await this.#client
+      .from("rooms")
+      .select("id")
+      .eq("name", name);
+    if (get.error) {
+      throw new Error(get.error.message);
+    }
+    return get.data![0].id;
   }
 
   async insertMessage(
@@ -118,11 +112,11 @@ export class Database {
   ) {
     await this.#client
       .from("messages")
-      .insert([{
+      .insert({
         message: message.text,
         room: message.roomId,
         from: message.userId,
-      }], { returning: "minimal" });
+      });
   }
 
   async getRoomMessages(roomId: number): Promise<MessageView[]> {
