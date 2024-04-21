@@ -27,6 +27,10 @@ export default function Chat(
     const subscription = server.subscribeMessages(roomId, (msg) => {
       switch (msg.kind) {
         case "isTyping": {
+          // Don't show "is typing" for myself
+          if (msg.from.name === user.name) {
+            return;
+          }
           if (typing) {
             clearInterval(typing.interval);
           }
