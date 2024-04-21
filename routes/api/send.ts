@@ -1,4 +1,3 @@
-import { HandlerContext } from "$fresh/server.ts";
 import { getCookies } from "$std/http/cookie.ts";
 import { emojify } from "emojify";
 import { databaseLoader } from "@/communication/database.ts";
@@ -6,10 +5,9 @@ import { RoomChannel } from "@/communication/channel.ts";
 import { badWordsCleanerLoader } from "@/helpers/bad_words.ts";
 import { ApiSendMessage } from "@/communication/types.ts";
 
-export async function handler(
+export const handler = async (
   req: Request,
-  _ctx: HandlerContext,
-): Promise<Response> {
+): Promise<Response> => {
   const accessToken = getCookies(req.headers)["deploy_chat_token"];
   if (!accessToken) {
     return new Response("Not signed in", { status: 401 });
@@ -47,4 +45,4 @@ export async function handler(
   });
 
   return new Response("OK");
-}
+};

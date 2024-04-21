@@ -1,4 +1,4 @@
-import { HandlerContext, PageProps } from "$fresh/server.ts";
+import { FreshContext, Handler, PageProps } from "$fresh/server.ts";
 import { Head } from "$fresh/runtime.ts";
 import twas from "twas";
 import { getCookies, setCookie } from "$std/http/cookie.ts";
@@ -7,10 +7,10 @@ import { gitHubApi } from "@/communication/github.ts";
 import { Footer } from "@/helpers/Footer.tsx";
 import type { RoomView } from "@/communication/types.ts";
 
-export async function handler(
+export const handler: Handler = async (
   req: Request,
-  ctx: HandlerContext,
-): Promise<Response> {
+  ctx: FreshContext,
+): Promise<Response> => {
   // Get cookie from request header and parse it
   const maybeAccessToken = getCookies(req.headers)["deploy_chat_token"];
   const database = await databaseLoader.getInstance();
@@ -48,7 +48,7 @@ export async function handler(
     httpOnly: true,
   });
   return response;
-}
+};
 
 export default function Main({ url, data }: PageProps<{ rooms: RoomView[] }>) {
   return (

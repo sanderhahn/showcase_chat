@@ -1,6 +1,6 @@
 import { deleteCookie } from "$std/http/cookie.ts";
 
-export function handler(req: Request): Response {
+export const handler = (req: Request): Response => {
   const headers = new Headers({
     "location": new URL(req.url).origin,
   });
@@ -11,4 +11,4 @@ export function handler(req: Request): Response {
     status: 302,
     headers,
   });
-}
+};
